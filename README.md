@@ -7,6 +7,10 @@ Walk around a pixel map, approach relay station profiles, and launch your AI age
 ![Python](https://img.shields.io/badge/python-3.8+-blue)
 ![Platform](https://img.shields.io/badge/platform-macOS-lightgrey)
 
+## Demo
+
+https://github.com/user-attachments/assets/0fc92831-c69e-4243-826a-7b34e3cdd522
+
 ## Features
 
 - Pokemon-style map — walk up to a profile ball to interact
