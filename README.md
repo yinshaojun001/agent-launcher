@@ -1,80 +1,92 @@
-# codex-launcher
+# agent-launcher
 
-A terminal TUI launcher for [Codex CLI](https://github.com/openai/codex) that manages multiple relay station profiles and switches between them before launching Codex.
+A Pokemon-style terminal TUI launcher for [Codex CLI](https://github.com/openai/codex) and [Claude Code](https://github.com/anthropics/claude-code).
+
+Walk around a pixel map, approach relay station profiles, and launch your AI agent of choice.
 
 ![Python](https://img.shields.io/badge/python-3.8+-blue)
 ![Platform](https://img.shields.io/badge/platform-macOS-lightgrey)
 
 ## Features
 
-- Switch between multiple API relay stations before launching Codex
-- Saves relay profiles (URL + API key) locally
-- Marks the currently active relay with `●`
-- Delete unused profiles with `d`
-- Auto-backs up `config.toml` and `auth.json` before every switch
-- Launches Codex directly via `exec` — no wrapper process
+- Pokemon-style map — walk up to a profile ball to interact
+- Supports both **Codex** and **Claude Code** relay configs
+- Per-profile relay config (URL + API key) for each agent
+- Built-in `✦` new-profile ball — add profiles without leaving the game
+- Split-screen layout: left = game map, right = live status panel
+- Auto-backups before every config switch
+- Launches agent directly via `exec` — no wrapper process
 
 ## Requirements
 
-- Python 3.8+
-- [Codex CLI](https://github.com/openai/codex) installed
+- Python 3.8+ (stdlib only, no dependencies)
+- macOS
+- [Codex CLI](https://github.com/openai/codex) and/or [Claude Code](https://github.com/anthropics/claude-code) installed
 
 ## Installation
 
 ```bash
-# Clone
-git clone https://github.com/yourname/codex-launcher.git
-cd codex-launcher
+git clone https://github.com/yourname/agent-launcher.git
+cd agent-launcher
 
-# Make executable
-chmod +x launcher.py
-
-# Add alias (add to ~/.zshrc or ~/.bashrc)
-echo "alias codex-launcher='python3 $(pwd)/launcher.py'" >> ~/.zshrc
+# Add alias
+echo "alias agent-launcher='python3 $(pwd)/launcher.py'" >> ~/.zshrc
 source ~/.zshrc
 ```
 
 ## Usage
 
 ```bash
-codex-launcher
+agent-launcher
 ```
 
-### Key bindings
+### Controls
 
 | Key | Action |
 |-----|--------|
-| `↑` / `↓` or `k` / `j` | Move selection |
-| `Enter` | Confirm |
-| `d` | Delete selected profile |
-| `q` / `Esc` | Cancel / go back |
+| `W` `A` `S` `D` / `↑↓←→` | Move character |
+| `Space` / `Enter` | Interact with nearby profile ball |
+| `P` | Open profiles manager |
+| `Q` | Quit |
+
+In profile editor:
+
+| Key | Action |
+|-----|--------|
+| `↑` `↓` | Move between fields |
+| `Enter` | Edit selected field |
+| `S` | Save profile |
+| `Esc` | Cancel |
 
 ### Workflow
 
-1. Run `codex-launcher`
-2. Select **Switch relay** to pick or add a relay station
-3. Select **Launch Codex** — Codex starts with the selected relay config
+1. Run `agent-launcher`
+2. Walk to the green `✦` ball to add your first relay profile
+3. Fill in a name, URL and API key for Codex and/or Claude
+4. Walk to the profile ball that appears, press Space
+5. Choose **Launch Codex** or **Launch Claude**
 
 ### Profile storage
 
-Profiles are saved to `~/.codex/relay-profiles.json`:
+Profiles are saved to `~/.agent-launcher/profiles.json`. They are never stored in the project directory.
 
 ```json
 [
   {
     "name": "my-relay",
-    "url": "https://example.com/v1",
-    "key": "sk-..."
+    "codex":  { "url": "https://example.com/v1",        "key": "sk-..." },
+    "claude": { "url": "https://example.com/anthropic",  "key": "tp-..." }
   }
 ]
 ```
 
-Backups of `config.toml` and `auth.json` are stored in `~/.codex/.auth-backups/`.
+Backups of modified config files are stored in `~/.agent-launcher/backups/`.
 
 ## How it works
 
-On relay switch, `launcher.py` updates three fields in `~/.codex/config.toml`:
+On launch, `launcher.py` writes the selected profile's config to:
 
+**Codex** — `~/.codex/config.toml` + `~/.codex/auth.json`
 ```toml
 model_provider = "custom"
 preferred_auth_method = "apikey"
@@ -83,7 +95,17 @@ preferred_auth_method = "apikey"
 base_url = "https://your-relay.com/v1"
 ```
 
-And writes the API key to `~/.codex/auth.json`. Then on launch it replaces itself with the Codex process via `os.execv`.
+**Claude Code** — `~/.claude/settings.json`
+```json
+{
+  "env": {
+    "ANTHROPIC_BASE_URL": "https://your-relay.com/anthropic",
+    "ANTHROPIC_AUTH_TOKEN": "tp-..."
+  }
+}
+```
+
+Then replaces itself with the agent process via `os.execv`.
 
 ## License
 
